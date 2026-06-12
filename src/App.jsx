@@ -50,43 +50,34 @@ function Header() {
   );
 }
 
-function FormComponent() {
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+function FormComponent({ profile, onChange }) {
   return (
     <>
       <InputField
         label={"Enter Name"}
         name="name"
         placeholder={"Please Enter Your Name"}
-        value={name}
+        value={profile.name}
         onChange={(e) => {
-          setName(e.target.value);
+          onChange("name", e.target.value);
         }}
       />
       <InputField
         label={"Enter Bio"}
         name="bio"
         placeholder={"Please Enter Your Bio"}
-        value={bio}
+        value={profile.bio}
         onChange={(e) => {
-          setBio(e.target.value);
+          onChange("bio", e.target.value);
         }}
       />
     </>
   );
 }
 
-function AddLinkBtn() {
+function AddLinkBtn({ onAddLink, socialLink }) {
   const [showSocialPlatform, setShowSocialPlatform] = useState(false);
-  const [socialLink, setSocialLink] = useState({});
-  const handleSocialLinkChange = (e) => {
-    const { name, value } = e.target;
-    setSocialLink((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+
   return (
     <div>
       <button
@@ -109,8 +100,10 @@ function AddLinkBtn() {
             <InputField
               id={platform.id}
               name={platform.id}
-              value={socialLink[platform.id]}
-              onChange={handleSocialLinkChange}
+              value={socialLink[platform.id] || ""}
+              onChange={(e) => {
+                onAddLink(platform.id, e.target.value);
+              }}
               placeholder={`Enter your ${platform.name} link`}
             />
           </div>
@@ -129,14 +122,34 @@ function GenerateLink() {
   );
 }
 function App() {
+  const [profile, setProfile] = useState({
+    name: "",
+    bio: "",
+  });
+
+  const handleProfileChange = (field, value) => {
+    setProfile((prev) => ({ ...prev, [field]: value }));
+  };
+  const [socialLink, setSocialLink] = useState({});
+  const handleSocialLinkChange = (platformId, url) => {
+    setSocialLink((prev) => ({
+      ...prev,
+      [platformId]: url,
+    }));
+  };
+
+  console.log(profile, socialLink);
   return (
     <>
       <ParentContainer>
         <ChildContainer>
           <NavBar />
           <Header />
-          <FormComponent />
-          <AddLinkBtn />
+          <FormComponent profile={profile} onChange={handleProfileChange} />
+          <AddLinkBtn
+            onAddLink={handleSocialLinkChange}
+            socialLink={socialLink}
+          />
           <GenerateLink />
         </ChildContainer>
       </ParentContainer>
