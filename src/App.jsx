@@ -1,5 +1,7 @@
 import { useState } from "react";
 import InputField from "./InputField";
+import socialPlatform from "./socialPlatform";
+
 function ParentContainer({ children }) {
   return (
     <div className="min-h-screen bg-gray-900 flex justify-center items-start">
@@ -74,6 +76,58 @@ function FormComponent() {
     </>
   );
 }
+
+function AddLinkBtn() {
+  const [showSocialPlatform, setShowSocialPlatform] = useState(false);
+  const [socialLink, setSocialLink] = useState({});
+  const handleSocialLinkChange = (e) => {
+    const { name, value } = e.target;
+    setSocialLink((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setShowSocialPlatform(!showSocialPlatform);
+        }}
+        className="block w-auto mx-auto mt- bg-teal-500 rounded p-4 text-xl cursor-pointer border-2 border-transparent
+    hover:border-solid hover:border-teal-200 hover:bg-white hover:text-teal-500 transition duration-300 ease-in-out "
+      >
+        {showSocialPlatform ? "Cancel" : "Add Link"}
+      </button>
+
+      {showSocialPlatform &&
+        socialPlatform.map((platform) => (
+          <div key={platform.id}>
+            <button className="cursor-pointer border-2px border-solid border-pink-700 bg-teal-950 text-xl text-white rounded-2xl w-40 p-2 flex flex-row items-center gap-4 m-2">
+              <span className="inline">{platform.icon}</span>
+              <span className="inline">{platform.name}</span>
+            </button>
+            <InputField
+              id={platform.id}
+              name={platform.id}
+              value={socialLink[platform.id]}
+              onChange={handleSocialLinkChange}
+              placeholder={`Enter your ${platform.name} link`}
+            />
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function GenerateLink() {
+  return (
+    <div className="flex justify-center mt-6">
+      <button className="bg-gray-500 text-white text-xl px-6 py-3 border-2 border-pink-600 rounded-xl shadow-lg hover:bg-pink-600 hover:scale-105 hover:border-transparent transition-all duration-300 cursor-pointer">
+        Generate a Magical Link
+      </button>
+    </div>
+  );
+}
 function App() {
   return (
     <>
@@ -82,6 +136,8 @@ function App() {
           <NavBar />
           <Header />
           <FormComponent />
+          <AddLinkBtn />
+          <GenerateLink />
         </ChildContainer>
       </ParentContainer>
     </>
