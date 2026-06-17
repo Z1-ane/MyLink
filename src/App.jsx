@@ -74,48 +74,79 @@ function FormComponent({ profile, onChange }) {
     </>
   );
 }
-
 function AddLinkBtn({ onAddLink, socialLink }) {
   const [showSocialPlatform, setShowSocialPlatform] = useState(false);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+
+  const handlePlatformSelect = (platformId) => {
+    setSelectedPlatforms((prev) => {
+      if (prev.includes(platformId)) {
+        return prev;
+      }
+
+      return [...prev, platformId];
+    });
+  };
 
   return (
-    <div>
+    <div className="mt-6">
       <button
-        onClick={() => {
-          setShowSocialPlatform(!showSocialPlatform);
-        }}
-        className="block w-auto mx-auto mt- bg-teal-500 rounded p-4 text-xl cursor-pointer border-2 border-transparent
-    hover:border-solid hover:border-teal-200 hover:bg-white hover:text-teal-500 transition duration-300 ease-in-out "
+        onClick={() => setShowSocialPlatform((prev) => !prev)}
+        className="block mx-auto bg-teal-500 rounded p-4 text-xl cursor-pointer border-2 border-transparent hover:border-teal-200 hover:bg-white hover:text-teal-500 transition duration-300"
       >
         {showSocialPlatform ? "Cancel" : "Add Link"}
       </button>
 
-      {showSocialPlatform &&
-        socialPlatform.map((platform) => (
-          <div key={platform.id}>
-            <button className="cursor-pointer border-2px border-solid border-pink-700 bg-teal-950 text-xl text-white rounded-2xl w-40 p-2 flex flex-row items-center gap-4 m-2">
-              <span className="inline">{platform.icon}</span>
-              <span className="inline">{platform.name}</span>
+      {/* Platform Selection Buttons */}
+      {showSocialPlatform && (
+        <div className="flex flex-wrap justify-center gap-3 mt-4">
+          {socialPlatform.map((platform) => (
+            <button
+              key={platform.id}
+              onClick={() => handlePlatformSelect(platform.id)}
+              className="cursor-pointer border border-pink-700 bg-teal-950 text-white rounded-2xl px-4 py-2 flex items-center gap-3"
+            >
+              <span>{platform.icon}</span>
+              <span>{platform.name}</span>
             </button>
+          ))}
+        </div>
+      )}
+
+      {/* Selected Platform Inputs */}
+      <div className="mt-4">
+        {selectedPlatforms.map((platformId) => {
+          const platform = socialPlatform.find(
+            (item) => item.id === platformId,
+          );
+
+          if (!platform) return null;
+
+          return (
             <InputField
+              key={platform.id}
               id={platform.id}
               name={platform.id}
               value={socialLink[platform.id] || ""}
-              onChange={(e) => {
-                onAddLink(platform.id, e.target.value);
-              }}
               placeholder={`Enter your ${platform.name} link`}
+              onChange={(e) => onAddLink(platform.id, e.target.value)}
             />
-          </div>
-        ))}
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function GenerateLink() {
+function GenerateLink({ profile, socialLink, onGenerateLink }) {
   return (
     <div className="flex justify-center mt-6">
-      <button className="bg-gray-500 text-white text-xl px-6 py-3 border-2 border-pink-600 rounded-xl shadow-lg hover:bg-pink-600 hover:scale-105 hover:border-transparent transition-all duration-300 cursor-pointer">
+      <button
+        onClick={() => {
+          onGenerateLink({ profile, socialLink });
+        }}
+        className="bg-gray-500 text-white text-xl px-6 py-3 border-2 border-pink-600 rounded-xl shadow-lg hover:bg-pink-600 hover:scale-105 hover:border-transparent transition-all duration-300 cursor-pointer"
+      >
         Generate a Magical Link
       </button>
     </div>
@@ -138,7 +169,15 @@ function App() {
     }));
   };
 
-  console.log(profile, socialLink);
+  const handleGenerateLink = ({ profile, socialLink }) => {
+    const data = {
+      profile,
+      socialLink,
+    };
+    const id = crypto.randomUUID();
+
+    localStorage.setItem(id, JSON.stringify(data));
+  };
   return (
     <>
       <ParentContainer>
@@ -150,7 +189,11 @@ function App() {
             onAddLink={handleSocialLinkChange}
             socialLink={socialLink}
           />
-          <GenerateLink />
+          <GenerateLink
+            profile={profile}
+            socialLink={socialLink}
+            onGenerateLink={handleGenerateLink}
+          />
         </ChildContainer>
       </ParentContainer>
     </>
